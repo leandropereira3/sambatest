@@ -1,0 +1,26 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+ "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+   xmlns:cc="http://java.sun.com/jsf/composite"
+   xmlns:h="http://java.sun.com/jsf/html"
+   xmlns:f="http://java.sun.com/jsf/core">
+
+ <cc:interface>
+     <cc:attribute name="nomeBotao" />
+     <cc:attribute name="caminhoVideo" required="true" />     
+ </cc:interface>
+
+ <cc:implementation>
+ <h:outputScript library="js" name="video.js" target="head"/>
+     <h:form>
+     <h:panelGrid id="video">
+         <video controls="controls">
+             <source src="https://www.youtube.com/embed/gnIZ7RMuLpU" type="video/mp4" />
+         </video>
+     </h:panelGrid>
+
+        
+ 
+     </h:form>
+ </cc:implementation>
+</html>

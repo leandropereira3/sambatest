@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE html >
+<html xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	
+	>
+<h:head>
+	<title>Sambatest</title>	
+	<script src="js/bootstrap.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css"></link>	
+	<script >
+		function abrir(url) {			
+			alert('#{videoController.arquivoSelecionado.url}');
+			window.open('#{videoController.arquivoSelecionado.url}', '_blank')
+		}
+	</script>
+	
+</h:head>
+<h:body>
+
+<div class="container">
+		
+	<div class="jumbotron text-center">
+		<h1>Sambatest</h1>
+	</div>
+	<br />
+	<h:form prependId="false">
+	<p:growl id="growl" showDetail="true" />
+	<div class="row">
+		<div class="col-md-12">			
+			<p:inputText value="#{videoController.keyConsulta}" size="50"></p:inputText>			
+			<p:commandButton value="Pesquisar" actionListener="#{videoController.find}" ajax="false"/>			
+			<p:commandButton value="Novo" type="button" onclick="PF('uploadModal').show();" />			
+		</div>		
+	</div>	
+	<div class="row">
+		<div style="height: 50px;"></div>	
+	</div>
+	
+	
+	
+	<p:dataTable  value="#{videoController.arquivosList}" var="arquivo">
+			<f:facet name="header">
+	           	<h:outputText value="Vídeos Encontrados" />
+	       	</f:facet>
+	       	<p:commandButton value="Ver" actionListener="#{videoController.find}"  />
+	       	<p:column headerText="Key">
+	       		<h:outputText value="#{arquivo.key}" />
+	       	</p:column>
+	       	<p:column headerText="Size (MB)">
+	       		<h:outputText value="#{arquivo.size}" />
+	       	</p:column>
+	       	<p:column headerText="">	       		
+	       		<p:commandButton value="Ver" actionListener="#{videoController.abrirArquivo(arquivo)}" oncomplete="PF('videoModal').show();" update=":vModal"/>
+	       	</p:column>
+	       	<p:column headerText="">
+	       		<p:commandButton  value="Excluir" action="#{videoController.excluir(arquivo)}" update="@form"/>	       		
+	       	</p:column>
+	   	</p:dataTable>	   	
+	   	
+	</h:form>
+
+
+
+</div>
+</h:body>
+
+<p:dialog header="Vídeo upload" widgetVar="uploadModal" modal="true"
+	height="200" width="650">
+	<div style="height: 30px;">
+		<h:outputText value="Selecione um arquivo de vídeo." />
+	</div>
+	<br />
+	<h:form enctype="multipart/form-data">
+		<p:growl id="messages" showDetail="true" />
+
+		<div style="height: 30px;">
+			<p:fileUpload value="#{videoController.file}" mode="simple"
+				skinSimple="true" />
+		</div>
+		<div>
+			<p:commandButton value="Enviar" ajax="false"
+				actionListener="#{videoController.upload}" onclick="PF('waitModal').show();"/>
+		</div>
+		
+	</h:form>
+</p:dialog>
+
+<p:dialog header="Sample" widgetVar="videoModal" id="vModal" modal="true" height="400" width="800" >
+	
+	<div style="height: 30px;">	
+		#{videoController.arquivoSelecionado.key}				
+	</div>
+	<br />
+	
+	<video width="320" height="240" controls="controls">
+  		<source src="#{videoController.arquivoSelecionado.url}" type="video/mp4"></source>
+  
+	Your browser does not support the video tag.
+	</video>
+	
+	<h:form>
+	<h:outputLink value="#{videoController.arquivoSelecionado.url}" target="_blank">IR</h:outputLink> 
+	</h:form>	
+	
+</p:dialog>
+	   	
+
+<p:dialog header="Processando" widgetVar="waitModal" modal="true" height="100" width="400">
+	
+	<div style="height: 30px;">	
+		Aguarde, a transferência pode durar alguns minutos...
+	</div>			
+	
+</p:dialog>
+
+</html>
