@@ -154,7 +154,6 @@ public class ArquivoServiceTest {
 	}
 	
 	
-	
 	public AmazonS3Client buildS3Client(){
 		BasicAWSCredentials awsCreds = new BasicAWSCredentials(ACCESS_KEY,
 				SECRET_KEY);				

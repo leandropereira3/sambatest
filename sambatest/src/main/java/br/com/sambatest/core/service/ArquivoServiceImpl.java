@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.faces.context.FacesContext;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
@@ -56,8 +58,8 @@ public class ArquivoServiceImpl implements ArquivoService {
 	static final String READ_PERMISSION = "READ";
 	
 
-	public void uploadFile(UploadedFile file) {
-		
+	public void uploadFile(UploadedFile file) {		
+		System.out.println("file" + file);
 		File newFile = new File(getTempDir() + file.getFileName());
 
 		//Cria um arquivo no diretorio temp com os dados do arquivo enviado
@@ -186,7 +188,12 @@ public class ArquivoServiceImpl implements ArquivoService {
 	 * 
 	 */
 	public String getTempDir() {
-		return System.getProperty("java.io.tmpdir") + File.separator;
+		String temp = FacesContext.getCurrentInstance().getExternalContext().getRealPath("");
+		String index = "tmp";		
+		int i = temp.indexOf(index);
+		String dirTemp = temp.substring(0, i)+index;
+		System.out.println(dirTemp);		
+		return dirTemp + File.separator;
 	}
 	
 	/**
