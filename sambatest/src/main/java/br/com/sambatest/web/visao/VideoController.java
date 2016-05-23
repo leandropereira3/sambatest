@@ -40,11 +40,7 @@ public class VideoController implements Serializable{
 	private static final long serialVersionUID = 6652263107707848041L;
 
 	@Autowired
-	private ArquivoService service;
-	
-	@Getter
-	@Setter
-	private String teste = "teste";
+	private ArquivoService service;	
 	
 	@Getter
 	@Setter
@@ -64,23 +60,20 @@ public class VideoController implements Serializable{
 	
 	@Getter
 	@Setter
-	private Arquivo arquivoSelecionado;
-	
-	@PostConstruct
-	public void init(){
-		setArquivo(null);
-		setArquivosList(new ArrayList<Arquivo>());
-		setKeyConsulta(null);
-		setArquivoSelecionado(null);
-		setFile(null);
-	}
+	private Arquivo arquivoSelecionado;	
 
+	/**
+	 * Envia o arquivo e atualiza o grid.
+	 */
 	public void upload(){
 		service.uploadFile(file);
 		find();
 		showMensagemInformacao("Operação realizada com sucesso!");
 	}
 	
+	/**
+	 * Consulta todos os registros ou um registro especifico.
+	 */
 	public void find(){
 		if(StringUtils.hasText(keyConsulta)){
 			setArquivosList(service.find(keyConsulta));
@@ -90,11 +83,15 @@ public class VideoController implements Serializable{
 		}
 	}
 	
+	/**
+	 * Exclui o arquivo selecionado e atualiza a listagem.
+	 */
 	public void excluir(Arquivo selectedArquivo){
 		service.excluir(selectedArquivo);
 		find();
 		showMensagemInformacao("Operação realizada com sucesso!");
 	}
+	
 	
 	public void abrirArquivo(Arquivo selectedArquivo){
 		setArquivoSelecionado(selectedArquivo);
@@ -102,19 +99,29 @@ public class VideoController implements Serializable{
 		System.out.println(arquivoSelecionado.getUrl());		
 		
 		ExternalContext externalContext = FacesContext.getCurrentInstance().getExternalContext();
-        try {
-        	Thread t = new Thread();
-    		t.sleep(20000);
+		waitSeconds(); //FIXME: Atrasa o andamento do processamento. Por algum motivo a url gerada não funciona nos primeiros segundos.   	
+		
+		try {
 			externalContext.redirect(arquivoSelecionado.getUrl());
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		}		
 	}
 	
+	/**
+	 * Atrasa o processamento por 20 segundos
+	 */
+	private void waitSeconds() {
+		try {
+        	Thread t = new Thread();
+    		t.sleep(20000);			
+		
+		} catch (InterruptedException e) {		
+			e.printStackTrace();
+		}
+		
+	}
+
 	private void showMensagemInformacao(String msg){
 		FacesContext.getCurrentInstance().addMessage("informacao",
 				new FacesMessage(FacesMessage.SEVERITY_INFO, msg,""));

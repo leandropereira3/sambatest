@@ -134,8 +134,7 @@ public class ArquivoServiceTest {
 			String line = "";
 			while ((line = rd.readLine()) != null) {
 				result.append(line);
-			}
-			
+			}			
 			
 			JSONObject obj = new JSONObject(result.toString());
 			JSONArray outputsResponse = new JSONArray(obj.get("outputs").toString());
