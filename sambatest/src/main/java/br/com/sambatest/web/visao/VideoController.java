@@ -11,8 +11,8 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.RequestScoped;
+import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
-import javax.faces.view.ViewScoped;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -20,6 +20,7 @@ import lombok.Setter;
 import org.primefaces.model.UploadedFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
 
 import br.com.sambatest.core.model.Arquivo;
 import br.com.sambatest.core.service.ArquivoService;
@@ -81,7 +82,12 @@ public class VideoController implements Serializable{
 	}
 	
 	public void find(){
-		setArquivosList(service.findAll(getKeyConsulta()));
+		if(StringUtils.hasText(keyConsulta)){
+			setArquivosList(service.find(keyConsulta));
+		}
+		else{
+			setArquivosList(service.findAll());			
+		}
 	}
 	
 	public void excluir(Arquivo selectedArquivo){
@@ -94,6 +100,19 @@ public class VideoController implements Serializable{
 		setArquivoSelecionado(selectedArquivo);
 		getArquivoSelecionado().setUrl(service.getUrlFile(arquivoSelecionado));
 		System.out.println(arquivoSelecionado.getUrl());		
+		
+		ExternalContext externalContext = FacesContext.getCurrentInstance().getExternalContext();
+        try {
+        	Thread t = new Thread();
+    		t.sleep(20000);
+			externalContext.redirect(arquivoSelecionado.getUrl());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	private void showMensagemInformacao(String msg){
