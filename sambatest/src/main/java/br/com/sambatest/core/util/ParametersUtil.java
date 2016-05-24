@@ -1,16 +1,19 @@
+/**
+ * 
+ */
 package br.com.sambatest.core.util;
 
 import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
-// Auto-generated Javadoc
 /**
- * Classe utilitaria para de Bundle.
+ * Classe que obtém parametros de configuracao
+ * 
+ * @author leandro.pereira
  *
- * @author luis.fernandez
  */
-public class AppParametersUtil {
+public class ParametersUtil {
 
 	/** The bundle. */
 	private static ResourceBundle bundle;
@@ -40,5 +43,4 @@ public class AppParametersUtil {
 	private static String formata(String mensagem, Object... parametros){
 		return MessageFormat.format(mensagem, parametros); 
 	}
-	
 }

@@ -28,7 +28,7 @@ import org.primefaces.model.UploadedFile;
 import org.springframework.stereotype.Service;
 
 import br.com.sambatest.core.model.Arquivo;
-import br.com.sambatest.core.util.AppParametersUtil;
+import br.com.sambatest.core.util.ParametersUtil;
 
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
@@ -56,6 +56,7 @@ public class ArquivoServiceImpl implements ArquivoService {
 	static final String PARAM_ZENCODER_KEY = "zencoderkey";
 	static final String PARAM_ZENCODER_GRANTEE = "zencodergrantee";	
 	static final String READ_PERMISSION = "READ";
+	static final Integer ONE_MB = 1000000;
 	
 
 	public void uploadFile(UploadedFile file) {		
@@ -88,7 +89,7 @@ public class ArquivoServiceImpl implements ArquivoService {
 		AmazonS3 s3Client = buildS3Client();
 				
 		PutObjectRequest objRequest = new PutObjectRequest(
-				AppParametersUtil.recupera(PARAM_BUCKET_NAME), file.getName(), file);
+				ParametersUtil.recupera(PARAM_BUCKET_NAME), file.getName(), file);
 		objRequest.setCannedAcl(CannedAccessControlList.PublicRead);		
 		PutObjectResult result = s3Client.putObject(objRequest);		
 		return result;
@@ -96,7 +97,7 @@ public class ArquivoServiceImpl implements ArquivoService {
 	
 	public void excluir(Arquivo selectedArquivo) {
 		AmazonS3 s3Client = buildS3Client();		
-		s3Client.deleteObject(new DeleteObjectRequest(AppParametersUtil.recupera(PARAM_BUCKET_NAME), selectedArquivo.getKey()));		
+		s3Client.deleteObject(new DeleteObjectRequest(ParametersUtil.recupera(PARAM_BUCKET_NAME), selectedArquivo.getKey()));		
 	}
 
 	public List<Arquivo> find(String key) {
@@ -118,7 +119,7 @@ public class ArquivoServiceImpl implements ArquivoService {
 
 		try {			
 			final ListObjectsV2Request req = new ListObjectsV2Request()
-					.withBucketName(AppParametersUtil.recupera(PARAM_BUCKET_NAME)).withMaxKeys(2);
+					.withBucketName(ParametersUtil.recupera(PARAM_BUCKET_NAME)).withMaxKeys(2);
 			ListObjectsV2Result result;
 			do {
 				result = s3client.listObjectsV2(req);
@@ -140,19 +141,19 @@ public class ArquivoServiceImpl implements ArquivoService {
 		try {			
 			@SuppressWarnings({ "deprecation", "resource" })
 			HttpClient client = new DefaultHttpClient();
-			HttpPost post = new HttpPost(AppParametersUtil.recupera(PARAM_ZENCODER_URL));
+			HttpPost post = new HttpPost(ParametersUtil.recupera(PARAM_ZENCODER_URL));
 			// add header
 			post.setHeader("Content-Type", "application/json");
-			post.setHeader("Zencoder-Api-Key", AppParametersUtil.recupera(PARAM_ZENCODER_KEY));					
+			post.setHeader("Zencoder-Api-Key", ParametersUtil.recupera(PARAM_ZENCODER_KEY));					
 
 			JSONObject jsonObject = new JSONObject();
 			JSONArray outputs = new JSONArray();
 			JSONObject jsonAccessControl = new JSONObject();
 			jsonAccessControl.put("permission", READ_PERMISSION);
-			jsonAccessControl.put("grantee", AppParametersUtil.recupera(PARAM_ZENCODER_GRANTEE));
+			jsonAccessControl.put("grantee", ParametersUtil.recupera(PARAM_ZENCODER_GRANTEE));
 			outputs.put(jsonAccessControl);
 			jsonObject.put("test", "true");
-			jsonObject.put("input", AppParametersUtil.recupera(PARAM_BUCKET_URL) + arquivo.getKey());
+			jsonObject.put("input", ParametersUtil.recupera(PARAM_BUCKET_URL) + arquivo.getKey());
 			jsonObject.put("outputs", outputs);
 
 			StringEntity se = new StringEntity(jsonObject.toString());			
@@ -191,8 +192,7 @@ public class ArquivoServiceImpl implements ArquivoService {
 		String temp = FacesContext.getCurrentInstance().getExternalContext().getRealPath("");
 		String index = "tmp";		
 		int i = temp.indexOf(index);
-		String dirTemp = temp.substring(0, i)+index;
-		System.out.println(dirTemp);		
+		String dirTemp = temp.substring(0, i)+index;		
 		return dirTemp + File.separator;
 	}
 	
@@ -201,8 +201,8 @@ public class ArquivoServiceImpl implements ArquivoService {
 	 *  
 	 */
 	private AmazonS3Client buildS3Client() {
-		BasicAWSCredentials awsCreds = new BasicAWSCredentials(AppParametersUtil.recupera(PARAM_ACCESS_KEY),
-				AppParametersUtil.recupera(PARAM_SECRET_KEY));
+		BasicAWSCredentials awsCreds = new BasicAWSCredentials(ParametersUtil.recupera(PARAM_ACCESS_KEY),
+				ParametersUtil.recupera(PARAM_SECRET_KEY));
 		return new AmazonS3Client(awsCreds);
 	}	
 	
@@ -216,7 +216,7 @@ public class ArquivoServiceImpl implements ArquivoService {
 
 		long size = objectSummary.getSize();
 		if (size > 0) {
-			arquivo.setSize((double) (size / 1000000));
+			arquivo.setSize((double) (size / ONE_MB));
 		} else {
 			arquivo.setSize((double) size);
 		}
