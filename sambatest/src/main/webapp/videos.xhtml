@@ -3,20 +3,13 @@
 <html xmlns:ui="http://java.sun.com/jsf/facelets"
 	xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:p="http://primefaces.org/ui"
-	xmlns:f="http://java.sun.com/jsf/core"
-	
+	xmlns:f="http://java.sun.com/jsf/core"	
 	>
+	
 <h:head>
 	<title>Sambatest</title>	
 	<script src="js/bootstrap.min.js"></script>
 	<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css"></link>	
-	<script >
-		function abrir(url) {			
-			alert('#{videoController.arquivoSelecionado.url}');
-			window.open('#{videoController.arquivoSelecionado.url}', '_blank')
-		}
-	</script>
-	
 </h:head>
 <h:body>
 
@@ -37,9 +30,7 @@
 	</div>	
 	<div class="row">
 		<div style="height: 50px;"></div>	
-	</div>
-	
-	
+	</div>	
 	
 	<p:dataTable  value="#{videoController.arquivosList}" var="arquivo">
 			<f:facet name="header">
@@ -58,12 +49,8 @@
 	       	<p:column headerText="">
 	       		<p:commandButton  value="Excluir" action="#{videoController.excluir(arquivo)}" update="@form" onclick="PF('waitRemoveModal').show();" oncomplete="PF('waitRemoveModal').hide();"/>	       		
 	       	</p:column>
-	   	</p:dataTable>	   	
-	   	
+	   	</p:dataTable>		   	
 	</h:form>
-
-
-
 </div>
 </h:body>
 
@@ -82,8 +69,7 @@
 		</div>
 		<div style="height: 60px;" align="center">			
 			<p:commandButton value="Enviar" ajax="false"
-				actionListener="#{videoController.upload}" onclick="PF('waitModal').show();"/>
-			
+				actionListener="#{videoController.upload}" onclick="PF('waitModal').show();"/>			
 		</div>
 		
 	</h:form>
