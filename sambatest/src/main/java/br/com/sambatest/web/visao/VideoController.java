@@ -38,6 +38,7 @@ public class VideoController implements Serializable{
 	 * 
 	 */
 	private static final long serialVersionUID = 6652263107707848041L;
+	static final Long SECONDS_TO_WAIT = 20000L;
 
 	@Autowired
 	private ArquivoService service;	
@@ -104,7 +105,7 @@ public class VideoController implements Serializable{
 		try {
 			externalContext.redirect(arquivoSelecionado.getUrl());
 		} catch (IOException e) {
-			e.printStackTrace();
+			showMensagemInformacao("Desculpe, houve um erro ao redirecionar para o vídeo.");
 		}		
 	}
 	
@@ -114,12 +115,11 @@ public class VideoController implements Serializable{
 	private void waitSeconds() {
 		try {
         	Thread t = new Thread();
-    		t.sleep(20000);			
+    		t.sleep(SECONDS_TO_WAIT);			
 		
 		} catch (InterruptedException e) {		
 			e.printStackTrace();
-		}
-		
+		}		
 	}
 
 	private void showMensagemInformacao(String msg){
