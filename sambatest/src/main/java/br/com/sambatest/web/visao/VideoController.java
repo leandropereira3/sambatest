@@ -67,9 +67,15 @@ public class VideoController implements Serializable{
 	 * Envia o arquivo e atualiza o grid.
 	 */
 	public void upload(){
-		service.uploadFile(file);
-		find();
-		showMensagemInformacao("Operação realizada com sucesso!");
+		try{
+			service.uploadFile(file);
+			find();
+			showMensagemInformacao("Operação realizada com sucesso!");
+		}
+		catch(Exception e){
+			showMensagemInformacao("Desculpe, houve um erro ao enviar o arquivo.");
+		}
+		
 	}
 	
 	/**

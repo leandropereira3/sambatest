@@ -4,6 +4,7 @@
 package br.com.sambatest.core.service;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 import org.primefaces.model.UploadedFile;
@@ -18,7 +19,7 @@ import com.amazonaws.services.s3.model.PutObjectResult;
  */
 public interface ArquivoService {
 
-	public void uploadFile(UploadedFile file);
+	public void uploadFile(UploadedFile file) throws IOException;
 	
 	public PutObjectResult insertFile(File file);
 	

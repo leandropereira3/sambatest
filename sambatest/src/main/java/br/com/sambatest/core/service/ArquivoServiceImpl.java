@@ -48,38 +48,30 @@ import com.amazonaws.services.s3.model.S3ObjectSummary;
 
 @Service
 public class ArquivoServiceImpl implements ArquivoService {
-	static final String PARAM_BUCKET_NAME = "bucket"; 
+	static final String PARAM_BUCKET_NAME = "bucket";
 	static final String PARAM_BUCKET_URL = "urlbucket";
 	static final String PARAM_ACCESS_KEY = "accesskey";
 	static final String PARAM_SECRET_KEY = "secretkey";
 	static final String PARAM_ZENCODER_URL = "zencoderurl";
 	static final String PARAM_ZENCODER_KEY = "zencoderkey";
-	static final String PARAM_ZENCODER_GRANTEE = "zencodergrantee";	
+	static final String PARAM_ZENCODER_GRANTEE = "zencodergrantee";
 	static final String READ_PERMISSION = "READ";
 	static final Integer ONE_MB = 1000000;
-	
 
-	public void uploadFile(UploadedFile file) {		
+	public void uploadFile(UploadedFile file) throws IOException {
 		System.out.println("file" + file);
 		File newFile = new File(getTempDir() + file.getFileName());
 
-		//Cria um arquivo no diretorio temp com os dados do arquivo enviado
-		try {
-			InputStream inputStream = file.getInputstream();
-			OutputStream outputStream = new FileOutputStream(newFile);
-			byte[] buffer = new byte[10 * 1024];
-			for (int length; (length = inputStream.read(buffer)) != -1;) {
-				outputStream.write(buffer, 0, length);
-				outputStream.flush();
-			}
-			
-			insertFile(newFile);
-
-		} catch (FileNotFoundException exception) {
-			exception.printStackTrace();
-		} catch (IOException ioException) {
-			ioException.printStackTrace();
+		// Cria um arquivo no diretorio temp com os dados do arquivo enviado
+		InputStream inputStream = file.getInputstream();
+		OutputStream outputStream = new FileOutputStream(newFile);
+		byte[] buffer = new byte[10 * 1024];
+		for (int length; (length = inputStream.read(buffer)) != -1;) {
+			outputStream.write(buffer, 0, length);
+			outputStream.flush();
 		}
+
+		insertFile(newFile);
 	}
 
 	/**
@@ -87,39 +79,42 @@ public class ArquivoServiceImpl implements ArquivoService {
 	 */
 	public PutObjectResult insertFile(File file) {
 		AmazonS3 s3Client = buildS3Client();
-				
+
 		PutObjectRequest objRequest = new PutObjectRequest(
-				ParametersUtil.recupera(PARAM_BUCKET_NAME), file.getName(), file);
-		objRequest.setCannedAcl(CannedAccessControlList.PublicRead);		
-		PutObjectResult result = s3Client.putObject(objRequest);		
+				ParametersUtil.recupera(PARAM_BUCKET_NAME), file.getName(),
+				file);
+		objRequest.setCannedAcl(CannedAccessControlList.PublicRead);
+		PutObjectResult result = s3Client.putObject(objRequest);
 		return result;
 	}
-	
+
 	public void excluir(Arquivo selectedArquivo) {
-		AmazonS3 s3Client = buildS3Client();		
-		s3Client.deleteObject(new DeleteObjectRequest(ParametersUtil.recupera(PARAM_BUCKET_NAME), selectedArquivo.getKey()));		
+		AmazonS3 s3Client = buildS3Client();
+		s3Client.deleteObject(new DeleteObjectRequest(ParametersUtil
+				.recupera(PARAM_BUCKET_NAME), selectedArquivo.getKey()));
 	}
 
 	public List<Arquivo> find(String key) {
 		List<Arquivo> arquivos = findAll();
 		Iterator<Arquivo> iterator = arquivos.iterator();
-		while(iterator.hasNext()){
+		while (iterator.hasNext()) {
 			Arquivo current = iterator.next();
-			if(!current.getKey().contains(key)){
+			if (!current.getKey().contains(key)) {
 				iterator.remove();
 			}
-		}		
-		
+		}
+
 		return arquivos;
-	}	 
-	
+	}
+
 	public List<Arquivo> findAll() {
 		List<Arquivo> arquivos = new ArrayList<Arquivo>();
 		AmazonS3 s3client = buildS3Client();
 
-		try {			
+		try {
 			final ListObjectsV2Request req = new ListObjectsV2Request()
-					.withBucketName(ParametersUtil.recupera(PARAM_BUCKET_NAME)).withMaxKeys(2);
+					.withBucketName(ParametersUtil.recupera(PARAM_BUCKET_NAME))
+					.withMaxKeys(2);
 			ListObjectsV2Result result;
 			do {
 				result = s3client.listObjectsV2(req);
@@ -127,7 +122,7 @@ public class ArquivoServiceImpl implements ArquivoService {
 				for (S3ObjectSummary objectSummary : result
 						.getObjectSummaries()) {
 					arquivos.add(buildNewArquivo(objectSummary));
-				}				
+				}
 				req.setContinuationToken(result.getNextContinuationToken());
 			} while (result.isTruncated() == true);
 		} catch (Exception e) {
@@ -135,28 +130,32 @@ public class ArquivoServiceImpl implements ArquivoService {
 		}
 
 		return arquivos;
-	}	
+	}
 
 	public String getUrlFile(Arquivo arquivo) {
-		try {			
+		try {
 			@SuppressWarnings({ "deprecation", "resource" })
 			HttpClient client = new DefaultHttpClient();
-			HttpPost post = new HttpPost(ParametersUtil.recupera(PARAM_ZENCODER_URL));
+			HttpPost post = new HttpPost(
+					ParametersUtil.recupera(PARAM_ZENCODER_URL));
 			// add header
 			post.setHeader("Content-Type", "application/json");
-			post.setHeader("Zencoder-Api-Key", ParametersUtil.recupera(PARAM_ZENCODER_KEY));					
+			post.setHeader("Zencoder-Api-Key",
+					ParametersUtil.recupera(PARAM_ZENCODER_KEY));
 
 			JSONObject jsonObject = new JSONObject();
 			JSONArray outputs = new JSONArray();
 			JSONObject jsonAccessControl = new JSONObject();
 			jsonAccessControl.put("permission", READ_PERMISSION);
-			jsonAccessControl.put("grantee", ParametersUtil.recupera(PARAM_ZENCODER_GRANTEE));
+			jsonAccessControl.put("grantee",
+					ParametersUtil.recupera(PARAM_ZENCODER_GRANTEE));
 			outputs.put(jsonAccessControl);
 			jsonObject.put("test", "true");
-			jsonObject.put("input", ParametersUtil.recupera(PARAM_BUCKET_URL) + arquivo.getKey());
+			jsonObject.put("input", ParametersUtil.recupera(PARAM_BUCKET_URL)
+					+ arquivo.getKey());
 			jsonObject.put("outputs", outputs);
 
-			StringEntity se = new StringEntity(jsonObject.toString());			
+			StringEntity se = new StringEntity(jsonObject.toString());
 			post.setEntity(se);
 
 			HttpResponse response = client.execute(post);
@@ -168,7 +167,7 @@ public class ArquivoServiceImpl implements ArquivoService {
 			String line = "";
 			while ((line = rd.readLine()) != null) {
 				result.append(line);
-			}			
+			}
 
 			JSONObject obj = new JSONObject(result.toString());
 			JSONArray outputsResponse = new JSONArray(obj.get("outputs")
@@ -189,25 +188,27 @@ public class ArquivoServiceImpl implements ArquivoService {
 	 * 
 	 */
 	public String getTempDir() {
-		String temp = FacesContext.getCurrentInstance().getExternalContext().getRealPath("");
-		String index = "tmp";		
+		String temp = FacesContext.getCurrentInstance().getExternalContext()
+				.getRealPath("");
+		String index = "tmp";
 		int i = temp.indexOf(index);
-		String dirTemp = temp.substring(0, i)+index;		
+		String dirTemp = temp.substring(0, i) + index;
 		return dirTemp + File.separator;
 	}
-	
+
 	/**
 	 * Cria o client S3 com as credenciais necessarias.
-	 *  
+	 * 
 	 */
 	private AmazonS3Client buildS3Client() {
-		BasicAWSCredentials awsCreds = new BasicAWSCredentials(ParametersUtil.recupera(PARAM_ACCESS_KEY),
+		BasicAWSCredentials awsCreds = new BasicAWSCredentials(
+				ParametersUtil.recupera(PARAM_ACCESS_KEY),
 				ParametersUtil.recupera(PARAM_SECRET_KEY));
 		return new AmazonS3Client(awsCreds);
-	}	
-	
+	}
+
 	/**
-	 * Converte o objeto S3 em um objeto Arquivo. 
+	 * Converte o objeto S3 em um objeto Arquivo.
 	 * 
 	 */
 	private Arquivo buildNewArquivo(S3ObjectSummary objectSummary) {
@@ -222,6 +223,6 @@ public class ArquivoServiceImpl implements ArquivoService {
 		}
 
 		return arquivo;
-	}	
-	
+	}
+
 }
